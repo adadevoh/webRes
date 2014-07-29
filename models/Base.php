@@ -111,7 +111,7 @@ class Base{
 
 	//update statement
 	//set it to pass strings or an array of values to update
-	protected function update($fieldName, $newValue, oldValue){
+	protected function update($fieldName, $newValue, $oldValue){
 		$query = "UPDATE $this->table SET $fieldName = :newValue WHERE $firstname = :oldValue";
 		$q = $this->db->prepare($query);
 		$q->bindParam(":newValue", $newValue);
