@@ -41,7 +41,7 @@ class Base{
 
 
 
-		$query = "INSERT INTO $this->table ( $data[0] ) VALUES ( $place_holder )"; //die();
+		$query = "INSERT INTO $this->table ( $data[0] ) VALUES ( $place_holder )";
 		$pattern = array("(",  ")");
 		if($data[0] == ""){
 			$query = preg_replace('/\(([^()]*+|(?R))*\)\s*/', "", $query, 1);// remove first occurence of "(" and ")"
@@ -112,25 +112,32 @@ class Base{
 	//update statement
 	//set it to pass strings or an array of values to update
 	protected function update($fieldName, $newValue, $oldValue){
-		$query = "UPDATE $this->table SET $fieldName = :newValue WHERE $firstname = :oldValue";
+		$query = "UPDATE $this->table SET $fieldName = :newValue WHERE $fieldName = (SELECT $fieldname from $this->table WHERE $fieldName = :oldValue)";
 		$q = $this->db->prepare($query);
 		$q->bindParam(":newValue", $newValue);
 		$q->bindParam(":oldValue", $oldValue);
 		if(!$q->execute()){
 			echo"update failed";
 		}
+		else
+			echo"update successful";
 
 
 	}
-	private function prepSelect(array $data){
+	private function prepSelect($data){
 		$fnames = "";
-
-		foreach ($data as $fieldName) {
-			$fnames .= "$fieldName, "; 
+		if(is_array($data)){
+			foreach ($data as $fieldName) {
+				$fnames .= "$fieldName, "; 
+			}
+			$fnames = rtrim($fnames, ' , ');
 		}
-		$fnames = rtrim($fnames, ' , ');
+		else
+			$fnames = "*";
 		return $fnames;
 	}
+
+
 	private function prepInsert(array $data){
 		$fnames = "";
 		$fvals = "";
@@ -139,16 +146,15 @@ class Base{
 		//just check if is associative array and handle as fieldname=> firldvalue
 		//else just handle as field values;
 
-		//print_r($data); die();
+
 		if($this->is_associative($data)){
 			echo "<br>associative!!!!!<br>";
 			foreach ($data as $fieldName => $fieldValue) {
-				$fnames .="$fieldName, "; echo"fnames: ". $fnames."<br>" ;
-				$fvals .="$fieldValue, "; echo"fvals: ". $fvals. "<br><br>";//----------------------------------------CHANGE---------------------
-			}//die();
-			$fnames = rtrim($fnames, ' ,'); //echo"fnames ". $fnames;
-			$fvals = rtrim($fvals, ' ,'); //echo"<br>fvals ". $fvals; die();
-			//return array($fnames, $fvals);
+				$fnames .="$fieldName, "; 
+				$fvals .="$fieldValue, ";
+			}
+			$fnames = rtrim($fnames, ' ,');
+			$fvals = rtrim($fvals, ' ,');
 		}
 		else{
 			echo"<br>Not Associative!!!!<br>";
@@ -156,7 +162,6 @@ class Base{
 				$fvals .="$value, ";
 			}
 			$fvals = rtrim($fvals, ' ,');
-			//return 
 		}
 		$result = array($fnames, $fvals);
 
@@ -164,16 +169,9 @@ class Base{
 	}
 	
 	private function is_associative($array){
-
 		return (bool)count(array_filter(array_keys($array), 'is_string'));
-
-		//return false;
-		/*if(){
-
-		}
-		else
-			return false;*/
 	}
+
 	public function test(){
 		$data = array('Firstname' => 'josh',
 					  'Lastname'  => 'adadevoh',
@@ -188,9 +186,6 @@ class Base{
 		echo $temp. "<br>";
 		$temp = rtrim($temp, ',') ;
 		echo $temp;
-
-
-		//echo rtrim($temp, ',') ;
 	}
 }
 ?>

@@ -31,7 +31,7 @@ $app = new \Slim\Slim(array('mode' => 'development',
 
 $app->get('/home', 'middleware1', 'middleware2', 'Controller\Home:display');
 $app->get('/model', 'Model\Base:test');
-$app->get('/user', 'Model\User:add');
+$app->get('/user', 'Model\User:create');
 $app->get('/getUser', 'Model\User:getUser' );
 
 $app->get('/test', function(){

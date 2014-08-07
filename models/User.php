@@ -26,41 +26,34 @@ class User extends \Model\Base{
 
 
 	//insert new user/record into db
-	public function add(/*$data*/){
-		$data = array("Firstname" => ":test",
-					  "Lastname"  => ":rand",
-					  "UserID"    => ":tester",
-					  "Password"  => "woeifj",
-					  "Email"     => "test@son.com",
-					  );
-
-		//$data = array("FirstTester", "lastnTest, RandID, RandPass, 0, test@rand.com");
+	public function create(/*$data*/){//recieve form data from the controller, store in array, and send to db
+		
 		$this->insert($data);
 	}
 
-	public function getUser(){
+	public function getUser(){//get user from db, then initialize user object with params
 		$clause= "WHERE userid = 'cadadevoh2018'";
-		$data = array("Firstname",  "Lastname");
-		print_r($this->find($data, $clause));
+		$data = "";
+		$result = $this->find($data, $clause);
+		$this->user = $result[0];
 
+		$this->setUser();
 	}
 
-	public function remove($fieldNaame, $value){
+	public function remove($fieldName, $value){
 		$this->delete($fieldNaame, $value);
 	}
 
-	public function setUser(array $params){
-		$this->user["Firstname"] = $this->firstname = $params['firstname'];
-		$this->user["Lastname"]  = $this->lastname = $params['lastname'];
-		$this->user["UserID"]    = $this->username = $params['username'];
-		$this->user["Password"]  = $this->password = $params['password'];
-		$this->user["Email"]     = $this->email = $params['email'];
-
+	public function setUser(){
+		$this->firstname = $this->user["Firstname"];
+		$this->lastname  = $this->user["Lastname"] ;
+		$this->username  = $this->user["UserID"]   ;
+		$this->password  = $this->user["Password"] ;
+		$this->email     = $this->user["Email"]    ;
 	}
 
-	protected function save(){
+	public function edit($field, $newValue){
 
-		$this->insert($user);
 	}
 
 	public function userTest(){
