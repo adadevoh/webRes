@@ -13,7 +13,7 @@ class User extends \Model\Base{
 					  		"Lastname"  => "",
 					  		"UserID"    => "",
 					  		"Password"  => "",
-					  		"Email"     => "",);
+					  		"Email"     => "");
 	protected $sql;// sql statement
 	protected $table;
 
@@ -37,19 +37,19 @@ class User extends \Model\Base{
 		$result = $this->find($data, $clause);
 		$this->user = $result[0];
 
-		$this->setUser();
+		$this->setUser($this->user);
 	}
 
 	public function remove($fieldName, $value){
 		$this->delete($fieldNaame, $value);
 	}
 
-	public function setUser(){
-		$this->firstname = $this->user["Firstname"];
-		$this->lastname  = $this->user["Lastname"] ;
-		$this->username  = $this->user["UserID"]   ;
-		$this->password  = $this->user["Password"] ;
-		$this->email     = $this->user["Email"]    ;
+	public function setUser($data){
+		$this->firstname = $data["Firstname"];
+		$this->lastname  = $data["Lastname"] ;
+		$this->username  = $data["UserID"]   ;
+		$this->password  = $data["Password"] ;
+		$this->email     = $data["Email"]    ;
 	}
 
 	public function edit($field, $newValue){

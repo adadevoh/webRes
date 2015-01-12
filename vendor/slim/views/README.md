@@ -14,20 +14,10 @@ Slim Views only officially support the following views listed below.
 
 #### using [Composer](http://getcomposer.org/)
 
-Create a composer.json file in your project root:
-    
-```json
-{
-    "require": {
-        "slim/views": "0.1.*"
-    }
-}
-```
-
-Then run the following composer command:
+Install in your project by running the following composer command:
 
 ```bash
-$ php composer.phar install
+$ php composer require slim/views
 ```
 
 ## Smarty
@@ -99,6 +89,7 @@ These helpers are listed below.
 - urlFor
 - siteUrl
 - baseUrl
+- currentUrl
 
 #### urlFor
 
@@ -163,6 +154,21 @@ __Smarty__
 Inside your Smarty template you would write:
 
     {baseUrl}
+
+
+#### currentUrl
+
+__Twig__
+
+Inside your Twig template you would write:
+
+    {{ currentUrl() }}
+
+__Smarty__
+
+Inside your Smarty template you would write:
+
+    {currentUrl}
 
 ## Authors
 
