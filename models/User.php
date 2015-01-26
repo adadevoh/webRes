@@ -5,6 +5,15 @@
 	should also be able to update values
 */
 
+	/*
+	tests
+	db connection: passed
+	insert: passed
+	find :
+	delete :
+	update:
+	**/
+
 namespace Model;
 
 class User extends \Model\Base{
