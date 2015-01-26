@@ -27,6 +27,23 @@ class User extends \Model\Base{
 
 	//insert new user/record into db
 	public function create(/*$data*/){//recieve form data from the controller, store in array, and send to db
+		 /*$data = array("Firstname" => "levi2",
+					  		"Lastname"  => "lewis2",
+					  		"UserID"    => "llewis2",
+					  		"Password"  => "lkemdw2",
+					  		"Email"     => "dev2@fit.edu");*/
+		
+
+		 $data = array("test3",
+					   "tester3",
+					   "ttester3",
+					   "lkemdw3",89,
+					   "devtest3@fit.edu");
+		 //will stick to using associative for now, tested none associative works, but user will need to insert
+		 //data for all fieldnames (columns) ie "INSERT INTO users VALUES ( ?, ?, ?, ?, ?, ? )", and this will mean
+		 //that for any columns that are auto inc, that feature will be overidden because the user will be entering that
+		 //data directly whoch might cuse problems like putting the table out of balance or errors because the user uses
+		 //a number that has been used for a different record already
 		
 		$this->insert($data);
 	}

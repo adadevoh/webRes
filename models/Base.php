@@ -4,7 +4,7 @@ namespace Model;
 
 class Base{
 	protected $db = null ;
-	protected function __construct(){
+	/*protected*/ public function __construct(){/* ******************Change to protected****************** */
 		try{
 			echo"base called<br>";
 			$this->db = new \PDO(DSN, DB_USER, DB_PASS);
@@ -27,11 +27,18 @@ class Base{
 	in order to use bindParam
 	*/
 	protected function insert(array $data) {
+		//if data is not an associative array, then the fieldsnams will not be specified, so
+		//the number of elements should match the number of columns in the db (or error will occur)
+		//table being inserted to. this means columns that have any auto-inc
+		//feature will have that feature over ridden (since the user is entering the value himself)
+
 		// example "INSERT INTO books (title,author) VALUES (:title,:author)";
 
 		$data = $this->prepQuery('insert', $data);
 		$place_holder = "";
 		$values = explode(',', $data[1]);
+		print_r($values);
+		//$values = array();
 
 		for($i = 0; $i<count($values); $i++){// initialize # of ? placeholders
 			$place_holder .= "?, ";
@@ -41,21 +48,21 @@ class Base{
 
 
 
-		$query = "INSERT INTO $this->table ( $data[0] ) VALUES ( $place_holder )";
+		$query = "INSERT INTO $this->table ( $data[0] ) VALUES ( $place_holder )"; 
 		$pattern = array("(",  ")");
 		if($data[0] == ""){
 			$query = preg_replace('/\(([^()]*+|(?R))*\)\s*/', "", $query, 1);// remove first occurence of "(" and ")"
-		}
+		}echo $query;
 
-		$q = $this->db->prepare($query);
-		
+		$q = $this->db->prepare($query); //echo $q;
+		//echo count($values);
 
 		for($i = 1; $i<=count($values); $i++){
 			$q->bindParam($i, $values[$i-1]);
 		}
 
 		if(!$q->execute()){
-			echo"<br>insert failed<br>";
+			echo"<br>insert failed<br> line 59";//write to logs
 			print_r($q->errorInfo());
 		}
 	}
@@ -141,9 +148,9 @@ class Base{
 	private function prepInsert(array $data){
 		$fnames = "";
 		$fvals = "";
-		$result = array();
+		$result = array(); //print_r($data); die();
 
-		//just check if is associative array and handle as fieldname=> firldvalue
+		//just check if is associative array and handle as fieldname=> fieldvalue
 		//else just handle as field values;
 
 
@@ -164,7 +171,6 @@ class Base{
 			$fvals = rtrim($fvals, ' ,');
 		}
 		$result = array($fnames, $fvals);
-
 		return $result;
 	}
 	
