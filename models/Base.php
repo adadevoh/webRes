@@ -1,13 +1,28 @@
 <?php
 
+/*
+	tests
+	db connection: passed
+	insert: passed
+	find : passed
+	delete : passed
+	update: passed
+	**/
+	//note: users oof this base class are responsible for properly sanitizing the query clauses attached.
+	//next version roll out: provide support for updating, deleting and multiple/single records in a single call
+	//and support for choosing what data (fieldNames) to return i.e fName, lName, age only, as opposed to all or one
+	//add how to get "rows afected" by a query (right now, for update. might be useful for others)
+
 namespace Model;
 
 class Base{
 	protected $db = null ;
+	protected $err_msg = null;
 	/*protected*/ public function __construct(){/* ******************Change to protected****************** */
 		try{
 			echo"base called<br>";
 			$this->db = new \PDO(DSN, DB_USER, DB_PASS);
+			$this->db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_WARNING);
 			echo"<br >PDO instantiated conected<br>";
 		}
 		catch( PDOException $e){
@@ -23,23 +38,21 @@ class Base{
 	//insert into
 	/*$data recieved as an associative array of fieldnames => values, and split into
 	two different strings in data = array (fieldnames, values)
-	fieldnames remain int he query string, while we now use question mark placeholders
+	fieldnames remain in the query string, while we now use question mark placeholders
 	in order to use bindParam
 	*/
-	protected function insert(array $data) {
-		//if data is not an associative array, then the fieldsnams will not be specified, so
-		//the number of elements should match the number of columns in the db (or error will occur)
-		//table being inserted to. this means columns that have any auto-inc
-		//feature will have that feature over ridden (since the user is entering the value himself)
+	//if data is not an associative array, then the fieldsnams will not be specified, so
+	//the number of elements should match the number of columns in the db (or error will occur)
+	//table being inserted to. this means columns that have any auto-inc
+	//feature will have that feature over ridden (since the user is entering the value himself)
 
-		// example "INSERT INTO books (title,author) VALUES (:title,:author)";
+	// example "INSERT INTO books (title,author) VALUES (:title,:author)";
+	protected function insert(array $data) {
 
 		$data = $this->prepQuery('insert', $data);
 		$place_holder = "";
 		$values = explode(',', $data[1]);
 		print_r($values);
-		//$values = array();
-
 		for($i = 0; $i<count($values); $i++){// initialize # of ? placeholders
 			$place_holder .= "?, ";
 		}
@@ -54,34 +67,121 @@ class Base{
 			$query = preg_replace('/\(([^()]*+|(?R))*\)\s*/', "", $query, 1);// remove first occurence of "(" and ")"
 		}echo $query;
 
-		$q = $this->db->prepare($query); //echo $q;
+		$q = $this->db->prepare($query);
 		//echo count($values);
-
-		for($i = 1; $i<=count($values); $i++){
-			$q->bindParam($i, $values[$i-1]);
+		try{
+			for($i = 1; $i<=count($values); $i++){
+				$q->bindParam($i, $values[$i-1]);
+			}
+			if($q->execute())
+				return true;
+			else{
+				$this->err_msg = $q->errorInfo();
+				return false;
+			}
 		}
-
-		if(!$q->execute()){
+		catch(PDOException $e){
 			echo"<br>insert failed<br> line 59";//write to logs
 			print_r($q->errorInfo());
 		}
 	}
 
 	//select statement
-	protected function find($data, $clause = ""){//"firstname, lastname"
-		$data = $this->prepQuery("select", $data);
-
-		$query = "SELECT $data FROM $this->table ". $clause;
+	protected function find($fieldName="*", $clause = ""){
+		$fieldName = $this->prepQuery("select", $fieldName);
+		$query = "SELECT $fieldName FROM $this->table $clause";
 
 		try{
 			$result = $this->db->query($query);
-			return $result->fetchAll();
+			$res = $result->fetchAll();
+			echo"<br><br>";
+			if(!empty($res))
+			{
+				return $res;
+			}
+			return false;
 		}
 		catch(PDOException $e){
-			echo("sorry an error occured: $e->getMessage()");
+			$this->err_msg = "sorry an error occured: $e->getMessage()";
 			return false;
 		}
 
+	}
+
+	//update statement
+	protected function update($fieldName, $newValue, $oldValue, $op="=", $clause=""){
+		$query = "UPDATE $this->table SET $fieldName = :newValue WHERE $fieldName $op :oldValue $clause";
+		try{
+
+		}
+		catch(PDOException $e){
+			
+		}
+		try{
+			$q = $this->db->prepare($query);
+			$q->bindParam(":newValue", $newValue);
+			$q->bindParam(":oldValue", $oldValue);
+			if(!$q->execute()){
+				echo"update failed";
+				//throw new pdo Error
+			}
+			else
+				echo"update successful";
+
+		}
+		catch(PDOException $e){
+			echo"PDO Exception: $->getMessage()";
+		}		
+	}
+
+	//delete a single record from the db using a unique key
+	protected function delete($fieldName, $value, $op="=", $clause=""){
+		//run delete query
+		$query = "DELETE FROM $this->table WHERE $fieldName ".$op."  :value $clause";
+		try{
+			$q = $this->db->prepare($query);
+			$q->bindParam(':value', $value, \PDO::PARAM_INT);
+			if(!$q->execute()){//if query fails to run
+				echo"query failed. delete not completed<br>";
+				return false;
+			}
+
+		}
+		catch(PDOException $e){
+			echo"PDO Exception: $->getMessage()";
+		}
+
+		////$data = array("$fieldname");//assuming $fieldname is a string, not an array
+		//$this->find($data, "WHERE $fieldName = $value");
+		//until I figure out how to prevent an sql injection, leave as is.
+		
+		//run a select query to see if the item is still in the db, if so the delete failed
+		$query = "SELECT * FROM $this->table WHERE $fieldName = :value";
+		try{
+			$q = $this->db->prepare($query);
+			$q->bindParam(':value', $value, \PDO::PARAM_INT);
+			$q->execute();
+			$res = $q->fetchAll();
+			//if item was actually deleted, fethcAll should return an empty array
+			if(empty($res)){
+				echo"delete successful<br>";
+				echo"This record is not in the database";
+				return true;
+			}
+			else{
+				echo"not deleted";
+				return false;
+			}
+		}
+		catch(PDOException $e){
+			echo"query failed. select failed";
+			echo"PDO Exception: $->getMessage()";
+		}
+	}
+
+	//delete ALL records that match the criteria
+	protected function deleteAll(){
+		
 	}
 
 	private function prepQuery($query, $data){
@@ -100,37 +200,7 @@ class Base{
 		}
 	}
 
-	//delete record
-	protected function delete($fieldName, $value){
-		$query = "DELETE FROM $this->table WHERE $fieldName =  :value";
-		$q = $this->db->prepare($query);
-		$q->bindParam(":value", $value);
-		if(!$q->execute()){
-			echo"failed to delete<br>";
-			return false;
-		}
-		else{
-			echo"delete successful<br>";
-			return true;
-		}
-	}
 
-
-	//update statement
-	//set it to pass strings or an array of values to update
-	protected function update($fieldName, $newValue, $oldValue){
-		$query = "UPDATE $this->table SET $fieldName = :newValue WHERE $fieldName = (SELECT $fieldname from $this->table WHERE $fieldName = :oldValue)";
-		$q = $this->db->prepare($query);
-		$q->bindParam(":newValue", $newValue);
-		$q->bindParam(":oldValue", $oldValue);
-		if(!$q->execute()){
-			echo"update failed";
-		}
-		else
-			echo"update successful";
-
-
-	}
 	private function prepSelect($data){
 		$fnames = "";
 		if(is_array($data)){
@@ -148,9 +218,9 @@ class Base{
 	private function prepInsert(array $data){
 		$fnames = "";
 		$fvals = "";
-		$result = array(); //print_r($data); die();
+		$result = array();
 
-		//just check if is associative array and handle as fieldname=> fieldvalue
+		//check if is associative array and handle as fieldname=> fieldvalue
 		//else just handle as field values;
 
 

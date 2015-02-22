@@ -31,12 +31,22 @@ $app = new \Slim\Slim(array('mode' => 'development',
 
 $app->get('/', 'middleware1', 'middleware2', 'Controller\Home:display');
 $app->get('/model', 'Model\Base:test');
-$app->get('/user', 'Model\User:create');
+$app->get('/create', 'Model\User:create');
 $app->get('/getUser', 'Model\User:getUser' );
+$app->get('/update', 'Model\User:edit');
+$app->get('/delete/:fieldName/:value', 'Model\User:remove');
+$app->get('/home', 'Controller\Home:display');
 
 $app->get('/test', function(){
-	$test = "my 'names' josh";
+	$test = "my 'names' josh<br><br>";
 	echo $test;
+	$m = array("boy", "girl", "cat");
+	if(empty($m)){
+		echo"empty";
+	}
+	else{echo"empty(var)";
+		print_r($m);
+	}
 });
 
 $app->error(function (\Exception $e) use ($app) {
@@ -44,8 +54,9 @@ $app->error(function (\Exception $e) use ($app) {
     echo($e->getMessage());
 });
 
-$app->get('/test3/:name/:adadevoh', function($nam, $adadevoh){
-	echo "name is : $nam ";echo $adadevoh;
+$app->get('/test3/:name/:adadevoh', function($do, $nam){//the order of values in the url need to match the order of arguments in the function
+	echo "name is : $nam <br>";
+	echo "adadevoh is: $do";
 });
 
 $app->get('/test2/:fieldName/:value', 'Model\User:remove');

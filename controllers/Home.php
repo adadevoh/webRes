@@ -10,9 +10,10 @@ class Home{
 	}
 
 	public function display(){
-		echo" called displaying Displ";
-		$this->app->render('myTemplate.php', array('name' => 'james'));
+		//echo" called display()<br>";
+		$this->app->render('testView.html', array('name' => 'james'));
 	}
+
 }
 
 

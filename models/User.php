@@ -9,7 +9,7 @@
 	tests
 	db connection: passed
 	insert: passed
-	find :
+	getUser : passed
 	delete :
 	update:
 	**/
@@ -30,44 +30,48 @@ class User extends \Model\Base{
 		echo"User model called<br>";
 		parent::__construct();
 
-		$this->table = "users";
+		$this->table = "user";
 	}
 
 
 	//insert new user/record into db
 	public function create(/*$data*/){//recieve form data from the controller, store in array, and send to db
-		 /*$data = array("Firstname" => "levi2",
-					  		"Lastname"  => "lewis2",
-					  		"UserID"    => "llewis2",
-					  		"Password"  => "lkemdw2",
-					  		"Email"     => "dev2@fit.edu");*/
+		 $data = array("Firstname"  => "caleb",
+					   "Lastname"   => "adadevoh",
+					  	"UserID"    => "cadadevoh2018",
+					  	"Password"  => "capass",
+					  	"Email"     => "cadadevoh2018@my.fit.edu");
+
+		 $data = array(
+		 				'Name' =>'Tester77',
+		 				'password' =>'pass77');
 		
 
-		 $data = array("test3",
+		 /*$data = array("test3",
 					   "tester3",
 					   "ttester3",
-					   "lkemdw3",89,
-					   "devtest3@fit.edu");
-		 //will stick to using associative for now, tested none associative works, but user will need to insert
-		 //data for all fieldnames (columns) ie "INSERT INTO users VALUES ( ?, ?, ?, ?, ?, ? )", and this will mean
-		 //that for any columns that are auto inc, that feature will be overidden because the user will be entering that
-		 //data directly whoch might cuse problems like putting the table out of balance or errors because the user uses
-		 //a number that has been used for a different record already
+					   "lkemdw3",91,
+					   "devtest3@fit.edu");*/
 		
 		$this->insert($data);
 	}
 
 	public function getUser(){//get user from db, then initialize user object with params
-		$clause= "WHERE userid = 'cadadevoh2018'";
-		$data = "";
+		$clause= "WHERE name like 'josh'";
+		$data ="";//data can be "*"
+		//$data = array("name");
 		$result = $this->find($data, $clause);
-		$this->user = $result[0];
+		echo"result :";print_r($result);
+		if(empty($result))
+			echo"empty array";
+		//echo"<br>". $this->user = $result[1]['name'];
+		//echo"oeke";
 
-		$this->setUser($this->user);
+		//$this->setUser($this->user);
 	}
 
 	public function remove($fieldName, $value){
-		$this->delete($fieldNaame, $value);
+		$this->delete($fieldName, $value, "=");
 	}
 
 	public function setUser($data){
@@ -78,8 +82,8 @@ class User extends \Model\Base{
 		$this->email     = $data["Email"]    ;
 	}
 
-	public function edit($field, $newValue){
-
+	public function edit($field="", $newValue=""){
+		$this->update("name", "joan", "josh");
 	}
 
 	public function userTest(){

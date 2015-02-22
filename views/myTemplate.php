@@ -1,8 +1,3 @@
-<html>
-	<head>
-		<title>Slim Tutorial</title>
-	</head>
-	<body>
-		{{name}}
-	</body>
-</html>
+{% extends 'layout.html' %}
+
+hello josh
