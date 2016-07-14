@@ -57,13 +57,15 @@ class User extends \Model\Base{
 	}
 
 	public function getUser(){//get user from db, then initialize user object with params
-		$clause= "WHERE name like 'josh'";
+		$clause= "WHERE name like 'joan'";
 		$data ="";//data can be "*"
-		//$data = array("name");
+		$data = array("name", "password");
 		$result = $this->find($data, $clause);
-		echo"result :";print_r($result);
-		if(empty($result))
-			echo"empty array";
+		 
+		if(is_array($result)) print_r($result);
+		else echo"result : $result";
+		//if(empty($result))
+			//echo"empty array";
 		//echo"<br>". $this->user = $result[1]['name'];
 		//echo"oeke";
 
