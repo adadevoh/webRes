@@ -1,8 +1,8 @@
 <?php
 
 define('DB_NAME', 'encourage');
-define('DB_PASS', 'joshada');
-define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_USER', '');
 define('DB_HOST', 'localhost');
 define('DSN', 'mysql:host='.DB_HOST.';dbname='.DB_NAME);
 
